@@ -38,18 +38,24 @@ class CurrencyControllerTest {
 
         mockMvc.perform(get("/api/currency/list"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value("USD"))
-                .andExpect(jsonPath("$[1]").value("EUR"));
+                .andExpect(jsonPath("$.currencies[0]").value("USD"))
+                .andExpect(jsonPath("$.currencies[1]").value("EUR"));
+
+        verify(currencyExchangeService, times(1)).getCurrencies();
     }
 
     @Test
     void shouldReturnExchangeRatesForCurrency() throws Exception {
-        Map<String, BigDecimal> rates = Map.of("EUR", BigDecimal.valueOf(0.89));
+        Map<String, BigDecimal> rates = Map.of("EUR", BigDecimal.valueOf(0.89), "GBP", BigDecimal.valueOf(0.75));
         when(currencyExchangeService.getExchangeRatesForCurrency("USD")).thenReturn(rates);
 
         mockMvc.perform(get("/api/currency/rates/USD"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.EUR").value(0.89));
+                .andExpect(jsonPath("$.currencyCode").value("USD"))
+                .andExpect(jsonPath("$.rates.EUR").value(0.89))
+                .andExpect(jsonPath("$.rates.GBP").value(0.75));
+
+        verify(currencyExchangeService, times(1)).getExchangeRatesForCurrency("USD");
     }
 
     @Test

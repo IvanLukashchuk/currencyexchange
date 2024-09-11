@@ -1,10 +1,17 @@
 package com.test.currencyexchange.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ExchangeRate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +30,6 @@ public class ExchangeRate {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    public ExchangeRate() {}
-
     public ExchangeRate(Currency currency, BigDecimal rate, String baseCurrencyCode) {
         this.currency = currency;
         this.rate = rate;
@@ -32,23 +37,4 @@ public class ExchangeRate {
         this.timestamp = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public BigDecimal getRate() {
-        return rate;
-    }
-
-    public String getBaseCurrencyCode() {
-        return baseCurrencyCode;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
 }

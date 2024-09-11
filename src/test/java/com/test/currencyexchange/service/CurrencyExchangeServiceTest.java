@@ -1,6 +1,7 @@
 package com.test.currencyexchange.service;
 
 import com.test.currencyexchange.entity.Currency;
+import com.test.currencyexchange.entity.ExchangeRate;
 import com.test.currencyexchange.external.ExchangeRateProvider;
 import com.test.currencyexchange.repository.CurrencyRepository;
 import com.test.currencyexchange.repository.ExchangeRateRepository;
@@ -51,7 +52,7 @@ class CurrencyExchangeServiceTest {
 
         verify(currencyRepository).save(any(Currency.class));
         verify(exchangeRateProvider).fetchRates(currencyCode);
-        verify(exchangeRateRepository, times(1)).save(any());
+        verify(exchangeRateRepository, times(1)).saveAll(any());
 
         Map<String, BigDecimal> cachedRates = currencyExchangeService.getExchangeRatesForCurrency(currencyCode);
         assertEquals(BigDecimal.valueOf(0.89), cachedRates.get("EUR"));
@@ -94,5 +95,29 @@ class CurrencyExchangeServiceTest {
         Map<String, BigDecimal> cachedRates = currencyExchangeService.getExchangeRatesForCurrency(currencyCode);
 
         assertTrue(cachedRates.isEmpty());
+    }
+
+    @Test
+    void shouldLoadCacheFromDatabaseOnStartup() {
+        Currency usd = new Currency(1L, "USD", null);
+        List<Currency> currencies = List.of(usd);
+
+        List<ExchangeRate> exchangeRates = List.of(
+                new ExchangeRate(1L, usd, BigDecimal.valueOf(1.0), "EUR", null),
+                new ExchangeRate(2L, usd, BigDecimal.valueOf(0.89), "GBP", null)
+        );
+
+        when(currencyRepository.findAll()).thenReturn(currencies);
+        when(exchangeRateRepository.findLatestRatesByCurrencyCode("USD")).thenReturn(exchangeRates);
+
+        currencyExchangeService.loadCacheFromDatabase();
+
+        Map<String, BigDecimal> cachedRates = currencyExchangeService.getExchangeRatesForCurrency("USD");
+
+        assertNotNull(cachedRates);
+        assertEquals(BigDecimal.valueOf(1.0), cachedRates.get("EUR"));
+        assertEquals(BigDecimal.valueOf(0.89), cachedRates.get("GBP"));
+        verify(currencyRepository, times(1)).findAll();
+        verify(exchangeRateRepository, times(1)).findLatestRatesByCurrencyCode("USD");
     }
 }

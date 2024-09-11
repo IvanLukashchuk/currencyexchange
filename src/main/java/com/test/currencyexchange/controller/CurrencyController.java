@@ -1,5 +1,7 @@
 package com.test.currencyexchange.controller;
 
+import com.test.currencyexchange.dto.CurrencyListDTO;
+import com.test.currencyexchange.dto.ExchangeRateDTO;
 import com.test.currencyexchange.service.CurrencyExchangeService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,13 +20,15 @@ public class CurrencyController {
     }
 
     @GetMapping("/list")
-    public List<String> getCurrencies() {
-        return currencyExchangeService.getCurrencies();
+    public CurrencyListDTO getCurrencies() {
+        List<String> currencies = currencyExchangeService.getCurrencies();
+        return new CurrencyListDTO(currencies);
     }
 
     @GetMapping("/rates/{currencyCode}")
-    public Map<String, BigDecimal> getExchangeRates(@PathVariable String currencyCode) {
-        return currencyExchangeService.getExchangeRatesForCurrency(currencyCode);
+    public ExchangeRateDTO getExchangeRates(@PathVariable String currencyCode) {
+        Map<String, BigDecimal> rates = currencyExchangeService.getExchangeRatesForCurrency(currencyCode);
+        return new ExchangeRateDTO(currencyCode, rates);
     }
 
     @PostMapping("/add")

@@ -15,8 +15,8 @@ public class ExchangeRateApiProvider implements ExchangeRateProvider {
 
     private final RestTemplate restTemplate;
 
-    public ExchangeRateApiProvider() {
-        this.restTemplate = new RestTemplate();
+    public ExchangeRateApiProvider(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class ExchangeRateApiProvider implements ExchangeRateProvider {
         } catch (HttpStatusCodeException e) {
             log.error("Failed to fetch rates for currency: {}. Status code: {}", currencyCode, e.getStatusCode());
         } catch (Exception e) {
-            log.error("Error occurred while fetching rates for currency: {}", currencyCode, e.getMessage());
+            log.error("Error occurred while fetching rates for currency: {}, {}", currencyCode, e.getMessage());
         }
         return new HashMap<>();
     }
